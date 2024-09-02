@@ -1,6 +1,6 @@
 # Nintendo 3DS demo
 Small demo for Nintendo 3DS to test out homebrew development. This is clone of a classic game Pong.
-![screenshot](https://raw.githubusercontent.com/0xWS/3ds-demo/main/screenshot.png)
+![screenshot](https://raw.githubusercontent.com/0xWS/3ds-demo/main/x.png)
 
 
 ## Compilling
