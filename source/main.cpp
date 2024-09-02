@@ -11,26 +11,11 @@
 #define TOP_SCREEN_WIDTH  400
 #define TOP_SCREEN_HEIGHT 240
 
-void printfile(const char* path)
-{
-	FILE* f = fopen(path, "r");
-	if (f)
-	{
-		char mystring[100];
-		while (fgets(mystring, sizeof(mystring), f))
-		{
-			int a = strlen(mystring);
-			if (mystring[a-1] == '\n')
-			{
-				mystring[a-1] = 0;
-				if (mystring[a-2] == '\r')
-					mystring[a-2] = 0;
-			}
-			puts(mystring);
-		}
-		fclose(f);
-	}
-}
+#define PADDLE_WIDTH 10
+#define PADDLE_HEIGHT 16
+
+#define BALL_WIDTH 16
+#define BALL_HEIGHT 16
 
 int main()
 {
@@ -38,13 +23,7 @@ int main()
 	consoleInit(GFX_BOTTOM, NULL);
 
 	Result rc = romfsInit();
-	if (rc)
-		printf("romfsInit: %08lX\n", rc);
-	else
-	{
-		printf("Bouncing ball demo!\n\n");
-		printfile("romfs:/folder/file.txt");
-	}
+	if (rc) printf("romfsInit: %08lX\n", rc);
 
 	C3D_Init(C3D_DEFAULT_CMDBUF_SIZE);
     C2D_Init(C2D_DEFAULT_MAX_OBJECTS);
@@ -74,35 +53,32 @@ int main()
 	float playerTwoX = (TOP_SCREEN_WIDTH - 32.0f);
 	float playerTwoY = (TOP_SCREEN_HEIGHT / 2.0f);
 
+	int playerOnePts = 0;
+	int playerTwoPts = 0;
+
 	// Main loop
 	while (aptMainLoop())
 	{
 		gspWaitForVBlank();
 		hidScanInput();
 
-		consoleClear();
-
 		u32 kDown = hidKeysDown();
+		u32 kHeld = hidKeysHeld();
 		if (kDown & KEY_START) {
 			break;
 		}
-		if (kDown & KEY_DUP) {
-			playerOneY-=20;
-			debugPrint(0,1, "DUP PRESSED");
+		if (kHeld & KEY_DUP && playerOneY > 0) {
+			playerOneY-=3;
 		}
-		if (kDown & KEY_DDOWN) {
-			playerOneY+=20;
-			debugPrint(0,1, "DDOWN PRESSED");
+		if (kHeld & KEY_DDOWN && playerOneY < TOP_SCREEN_HEIGHT - PADDLE_HEIGHT) {
+			playerOneY+=3;
 		}
-		if (kDown & KEY_Y) {
-			playerTwoY-=20;
-			debugPrint(0,1, "DUP PRESSED");
+		if (kHeld & KEY_Y && playerTwoY > 0) {
+			playerTwoY-=3;
 		}
-		if (kDown & KEY_B) {
-			playerTwoY+=20;
-			debugPrint(0,1, "DDOWN PRESSED");
+		if (kHeld & KEY_B && playerTwoY < TOP_SCREEN_HEIGHT - PADDLE_HEIGHT) {
+			playerTwoY+=3;
 		}
-		
 
 		C3D_FrameBegin(C3D_FRAME_SYNCDRAW);
 		C2D_TargetClear(top, C2D_Color32f(0.0, 0.0, 1.0, 1.0));
@@ -117,15 +93,40 @@ int main()
 		y += y_change * 2.0f;
 
 		//Ball bounce
-		if(x >= TOP_SCREEN_WIDTH - ballImage.subtex->width) x_change = -1;
-		if(x <= 0) x_change = 1;
+		if(x >= TOP_SCREEN_WIDTH - ballImage.subtex->width) {
+			x = (TOP_SCREEN_WIDTH - ballImage.subtex->width) / 2.0f;
+ 			y = (TOP_SCREEN_HEIGHT - ballImage.subtex->height) / 2.0f;
+			playerOnePts++;
+		}
+		if(x <= 0) {
+			x = (TOP_SCREEN_WIDTH - ballImage.subtex->width) / 2.0f;
+ 			y = (TOP_SCREEN_HEIGHT - ballImage.subtex->height) / 2.0f;
+			playerTwoPts++;
+		}
 		if(y >= TOP_SCREEN_HEIGHT - ballImage.subtex->height) y_change = -1;
 		if(y <= 0) y_change = 1;
 
-		
+		//Bounce from paddle
+		if (x <= playerOneX + PADDLE_WIDTH &&
+		    x + BALL_WIDTH >= playerOneX &&
+		    y + BALL_HEIGHT >= playerOneY &&
+		    y <= playerOneY + PADDLE_HEIGHT) {
+		    x_change = 1;
+		}
 
+		if (x + BALL_WIDTH >= playerTwoX &&
+		    x <= playerTwoX + PADDLE_WIDTH &&
+		    y + BALL_HEIGHT >= playerTwoY &&
+		    y <= playerTwoY + PADDLE_HEIGHT) {
+		    x_change = -1;
+		}
 
+		consoleClear();
 		debugPrint(0, 0, "Ball pos: (%.2f, %.2f)", x, y);
+		debugPrint(0, 1, "Player 1 pos: (%.2f, %.2f)", playerOneX, playerOneY);
+		debugPrint(0, 2, "Player 2 pos: (%.2f, %.2f)", playerTwoX, playerTwoY);
+		debugPrint(0, 4, "Player 1: %d", playerOnePts);
+		debugPrint(0, 5, "Player 2: %d", playerTwoPts);
 
         C3D_FrameEnd(0);
 	}
