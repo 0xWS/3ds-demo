@@ -73,7 +73,7 @@ int main()
 		if (kHeld & KEY_DDOWN && playerOneY < TOP_SCREEN_HEIGHT - PADDLE_HEIGHT) {
 			playerOneY+=3;
 		}
-		if (kHeld & KEY_Y && playerTwoY > 0) {
+		if (kHeld & KEY_X && playerTwoY > 0) {
 			playerTwoY-=3;
 		}
 		if (kHeld & KEY_B && playerTwoY < TOP_SCREEN_HEIGHT - PADDLE_HEIGHT) {

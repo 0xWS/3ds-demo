@@ -31,9 +31,9 @@ include $(DEVKITARM)/3ds_rules
 #     - icon.png
 #     - <libctru folder>/default_icon.png
 #---------------------------------------------------------------------------------
-APP_TITLE		:=	Hello World!
-APP_DESCRIPTION	:=	Hello world test application
-APP_AUTHOR		:=	@jesieniarz
+APP_TITLE		:=	Pong Demo
+APP_DESCRIPTION	:=	Classic Pong Game
+APP_AUTHOR		:=	@jesx64
 #ICON			:=	path/to/your/icon.png
 
 TARGET		:=	$(notdir $(CURDIR))
